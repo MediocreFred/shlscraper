@@ -1,6 +1,7 @@
 import requests, json, csv, random
 from bs4 import BeautifulSoup
-
+import os
+#os.chdir(r'C:\projects\shl_scraper')
 
 user_agent_list = [
    # Chrome
@@ -38,7 +39,7 @@ def get_smjhl_players(url_file, smjhl_players_csv):
     for team in team_url_list:  # For each team in the list
         player_url_list = get_player_urls(team[1])  # get each player page URL
         for player in player_url_list:  # for each player in player_url_list
-            player_dict_list.append(get_player_stats('https://www.simulationhockey.com/' + player, team[0]))
+            player_dict_list.append(get_player_stats('https://www.simulationhockey.com/' + player, team[0],'Prospect'))
     # look into using csv dictwriter.writerows() to write the list of dictionaries into the csv file
     csv_file = smjhl_players_csv
     csv_columns = player_dict_list[0].keys()
@@ -56,7 +57,7 @@ def get_shl_players(url_file, shl_players_csv):
     for team in team_url_list:  # For each team in the list
         player_url_list = get_player_urls(team[1])  # get each player page URL
         for player in player_url_list:  # for each player in player_url_list
-            player_dict_list.append(get_player_stats('https://www.simulationhockey.com/' + player, team[0]))
+            player_dict_list.append(get_player_stats('https://www.simulationhockey.com/' + player, team[0],'SHL'))
     # look into using csv dictwriter.writerows() to write the list of dictionaries into the csv file
     csv_file = shl_players_csv
     csv_columns = player_dict_list[0].keys()
@@ -66,6 +67,22 @@ def get_shl_players(url_file, shl_players_csv):
         for data in player_dict_list:
             writer.writerow(data)
 
+def get_shl_prospects(url_file, shl_prospects_csv):
+    """use the urls provided in the json to get each player's information"""
+    prospect_url_list = get_roster_url(url_file, 'Prospects')
+    player_dict_list = list()  # list that will hold all of the player info dicts to be put into a csv
+    for team in prospect_url_list:  # For each team in the list
+        player_url_list = get_player_urls(team[1])  # get each player page URL
+        for player in player_url_list:  # for each player in player_url_list
+            player_dict_list.append(get_player_stats('https://www.simulationhockey.com/' + player, team[0],'Prospect'))
+    # look into using csv dictwriter.writerows() to write the list of dictionaries into the csv file
+    csv_file = shl_prospects_csv
+    csv_columns = player_dict_list[0].keys()
+    with open(csv_file, 'w+', encoding='utf-8-sig', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
+        writer.writeheader()
+        for data in player_dict_list:
+            writer.writerow(data)
 
 def get_roster_url(url_file, league):
     """Get the roster URLs for the specified league"""
@@ -90,7 +107,7 @@ def get_player_urls(team_roster_url):
         soup = BeautifulSoup(roster_page.content, 'html.parser')
         smaller_soup = soup.find_all('tr', 'inline_row')
         for section in smaller_soup:
-            a = section.find('a', attrs={'style': 'font-size:14px;'}, href=True)
+            a = section.find('a', attrs={'style':'font-size:14px;'}, href=True)
             return_list.append(a['href'])
         has_next = len(soup.find_all('a', 'pagination_next')) != 0  # check if there is a next page
         if has_next:
@@ -98,42 +115,48 @@ def get_player_urls(team_roster_url):
     return return_list
 
 
-def get_player_stats(name_url, team):
+def get_player_stats(name_url, team, player_type):
     """Use the given url to find and get all of the stats. Returns a dictionary"""
-    player = dict.fromkeys(['Team', 'Draft Class', 'First Name', 'Last Name', 'Position', 'Shoots', 'Recruited by',
-                            'Player Render', 'Jersey Number', 'Height', 'Weight', 'Birthplace', 'Player Type',
-                            'Strengths', 'Weakness', 'Points Available', 'CK', 'FG', 'DI', 'SK', 'ST', 'EN', 'DU', 'PH',
-                            'FO', 'PA', 'SC', 'DF', 'PS', 'AG', 'SZ', 'RB', 'RT', 'HS', 'TPE'])
+    player = dict.fromkeys(['Team', 'Player Type', 'Player URL', 'Draft Class', 'Draft Class Numeric', 'First Name', 'Last Name', 'Position', 'Shoots', 'Recruited by',
+                            'Player Render', 'Jersey Number', 'Height', 'Weight', 'Birthplace', 'Player Role',
+                            'Strengths', 'Weakness', 'Points Available', 
+                            'Screening', 'Getting Open', 'Passing', 'Puckhandling', 'Shooting Accuracy', 'Shooting Range', 'Offensive Read',
+                            'Checking','Hitting','Stickchecking','Shot Blocking','Faceoffs','Defensive Read',
+                            'Acceleration','Agility','Balance','Speed','Stamina','Strength','Fighting',
+                            'Aggression','Bravery','Determination','Team Player','Leadership','Temperament','Professionalism',
+                            'Blocker','Glove','Passing','Poke Check','Positioning','Rebound','Recovery','Puckhandling','Low Shots','Reflexes','Skating',
+                            'Mental Toughness','Goalie Stamina',
+                            'Listed TPE','Applied TPE','Total TPE'
+                           ])
+    player['Player URL'] = name_url
     player['Team'] = team
+    player['Player Type'] = player_type
     user_agent = random.choice(user_agent_list)
-    print(user_agent)
+    #print(user_agent)
     headers = {'User-Agent': user_agent}
     player_page = requests.get(name_url, headers=headers)
     soup = BeautifulSoup(player_page.content, 'html.parser')
 
     # Get the Position, TPE, and Draft Class
+    print(soup.find_all('td', 'thead')[1].strong.text)
     position_and_class = soup.find_all('td', 'thead')[1].strong.text
     tpe = str()
     draft_class = str()
     position = str()
-
-    if position_and_class.__contains__(' C ') or position_and_class.__contains__(
-            ' Center ') or position_and_class.__contains__(' CENTER '):
+    if position_and_class.__contains__(' C ') or position_and_class.lower().__contains__('center') or position_and_class.__contains__(' C-') or position_and_class.lower().__contains__('centre'): 
         position = 'C'
-    if position_and_class.__contains__(' LW ') or position_and_class.__contains__(
-            ' Left Wing ') or position_and_class.__contains__(' LEFT WING '):
+    if position_and_class.__contains__(' LW ') or position_and_class.lower().__contains__('left wing') or position_and_class.__contains__(' LW-'):
         position = 'LW'
-    if position_and_class.__contains__(' RW ') or position_and_class.__contains__(
-            ' Right Wing ') or position_and_class.__contains__(' RIGHT WING '):
+    if position_and_class.__contains__(' RW ') or position_and_class.lower().__contains__('right wing') or position_and_class.__contains__(' RW-'):
         position = 'RW'
-    if position_and_class.__contains__(' D ') or position_and_class.__contains__(
-            ' Defense ') or position_and_class.__contains__(' DEFENSE '):
+    if position_and_class.__contains__(' D ') or position_and_class.lower().__contains__('defense') or position_and_class.__contains__(' D-'):
         position = 'D'
     if position_and_class.__contains__(' G ') or position_and_class.__contains__(
-            ' Goalie ') or position_and_class.__contains__(' GOALIE '):
+            ' Goalie ') or position_and_class.lower().__contains__('goalie') or position_and_class.__contains__(' G-'):
         position = 'G'
 
-    draft_class = position_and_class.split()[0].strip('[').strip(']')
+    draft_class = position_and_class.split()[0].strip('[').strip(']').strip('(').strip(')')
+    #draft_class_num = position_and_class.split()[0].strip('[').strip(']').strip('S').strip('(').strip(')')
     try:
         tpe = soup.find_all('td', 'thead')[1].small.text
         if len(tpe.split()) == 3:
@@ -143,192 +166,256 @@ def get_player_stats(name_url, team):
     except:
         tpe = 'Calculation function not available'
 
-
     post = soup.find_all('div', 'post_body scaleimages')[0]
-    post_text = post.text.split('\n')  # split the text from the body up into rows for easy iteration
+    post_text = post.text.split('\n') # split the text from the body up into rows for easy iteration
 
-    player['Draft Class'] = draft_class
-    player['TPE'] = tpe
+    player['Draft Class'] = 'S'+draft_class.strip('S')
+    player['Draft Class Numeric'] = draft_class.strip('S')
+    player['Listed TPE'] = tpe
     player['Played Position'] = position
 
-    for line in post_text:
-        # why don't switch statements exist in Python???????
-        if line.startswith('First Name'):
-            try:
-                player['First Name'] = line.split(':')[1].strip()  # this gets the first name from the first name line
-            except:
-                player['First Name'] = ''
-        elif line.startswith('Last Name'):
-            try:
-                player['Last Name'] = line.split(':')[1].strip()  # this gets the first name from the last name line
-                print(player['Last Name'])
-            except:
-                player['Last Name'] = ''
-        elif line.startswith('Position'):
-            try:
-                player['Position'] = line.split(':')[1].strip()  # this gets the player position
-            except:
-                player['Position'] = ''
-        elif line.startswith('Shoots'):
-            try:
-                if line.split(':')[1].strip() == 'L':
-                    player['Shoots'] = 'Left'  # this gets the player shooting hand
-                if line.split(':')[1].strip() == 'R':
-                    player['Shoots'] = 'Right'
-                else:
-                    player['Shoots'] = line.split(':')[1].strip()
-            except:
-                player['Shoots'] = ''
-        elif line.startswith('Recruited'):
-            try:
-                player['Recruited by'] = line.split(':')[1].strip()  # this gets where they were recruited (if applicable)
-            except:
-                player['Recruited by'] = ''
-        elif line.startswith('Player Render'):
-            try:
-                player['Player Render'] = line.split(':')[1].strip()  # this gets the player render
-            except:
-                player['Player Render'] = ''
-        elif line.startswith('Jersey Number'):
-            try:
-                player['Jersey Number'] = line.split(':')[1].strip()  # this gets the player Jersey Number
-            except:
-                player['Jersey Number'] = ''
-        elif line.startswith('Height'):
-            try:
-                player['Height'] = line.split(':')[1].strip()  # this gets the player height
-            except:
-                player['Height'] = ''
-        elif line.startswith('Weight'):
-            try:
-                player['Weight'] = line.split(':')[1].strip()  # this gets the player weight
-            except:
-                player['Weight'] = ''
-        elif line.startswith('Birthplace'):
-            try:
-                player['Birthplace'] = line.split(':')[1].strip()  # this gets the player birthplace
-            except:
-                player['Birthplace'] = ''
-        elif line.startswith('Player Type'):
-            try:
-                player['Player Type'] = line.split(':')[1].strip()  # this gets the player type
-            except:
-                player['Player Type'] = ''
-        elif line.startswith('Strengths'):
-            try:
-                player['Strengths'] = line.split(':')[1].strip()  # this gets the player strengths
-            except:
-                player['Strengths'] = ''
-        elif line.startswith('Weakness'):
-            try:
-                player['Weakness'] = line.split(':')[1].strip()  # this gets the player weakness
-            except:
-                player['Weakness'] = ''
-        elif line.startswith('Points Available'):
-            try:
-                available = line.split(':')[1].strip()  # this gets the amount of points the player has available
-                available = available.split()[0].rstrip('Â')
-                player['Points Available'] = available
-            except:
-                player['Points Available'] = '0'
-        #if position != 'G' and player['Last Name'] != 'Yukikami' and player['Last Name'] != 'Hughes':
-        if position != 'G':
-            if line.startswith('CK'):
-                player['CK'] = line.split(': ')[1]  # this gets the player Checking
-            elif line.startswith('FG'):
-                player['FG'] = line.split(': ')[1]  # this gets the player fighting
-            elif line.startswith('DI'):
-                player['DI'] = line.split(': ')[1]  # this gets the player Discipline
-            elif line.startswith('SK'):
-                player['SK'] = line.split(': ')[1]  # this gets the player skating
-            elif line.startswith('ST'):
-                player['ST'] = line.split(':')[1].strip()  # this gets the player strength
-            elif line.startswith('EN'):
-                player['EN'] = line.split(': ')[1]  # this gets the player endurance
-            elif line.startswith('DU'):
-                #player['DU'] = line.split(': ')[1]  # this gets the player durability
-                player['DU'] = '50'
-            elif line.startswith('PH'):
+    for l in post_text:
+        ln = l.split('|')
+        for line in ln:
+            # why don't switch statements exist in Python???????
+            if line.lower().startswith('first name'):
                 try:
-                    player['PH'] = line.split(':')[1].strip()  # this gets the player Puck handling
+                    player['First Name'] = get_attr(line,1)  # this gets the first name from the first name line
                 except:
-                    player['PH'] = ''
-            elif line.startswith('FO'):
-                player['FO'] = line.split(': ')[1]  # this gets the player face off
-            elif line.startswith('PA'):
-                player['PA'] = line.split(': ')[1]  # this gets the player Passing
-            elif line.startswith('SC'):
-                player['SC'] = line.split(': ')[1]  # this gets the player scoring
-            elif line.startswith('DF'):
-                player['DF'] = line.split(': ')[1]  # this gets the player defence
-            elif line.startswith('PS'):
-                player['PS'] = line.split(': ')[1]  # this gets the player penalty shot
-        elif position == 'G':
-            if line.startswith('SK'):
-                player['SK'] = line.split(': ')[1]  # this gets the player skating
-            elif line.startswith('DU'):
-                #player['DU'] = line.split(': ')[1]  # this gets the player durability
-                player['DU'] = '50'
-            elif line.startswith('EN'):
-                player['EN'] = line.split(': ')[1]  # this gets the player endurance
-            elif line.startswith('SZ'):
-                player['SZ'] = line.split(': ')[1]  # this gets the player Size
-            elif line.startswith('AG'):
-                player['AG'] = line.split(': ')[1]  # this gets the player Agility
-            elif line.startswith('RB'):
-                player['RB'] = line.split(': ')[1]  # this gets the player rebound control
-            elif line.startswith('SC'):
-                player['SC'] = line.split(': ')[1]  # this gets the player style control
-            elif line.startswith('HS'):
-                player['HS'] = line.split(': ')[1]  # this gets the player Hand speed
-            elif line.startswith('RT'):
-                player['RT'] = line.split(': ')[1]  # this gets the player reaction Time
-            elif line.startswith('PH'):
-                player['PH'] = line.split(': ')[1]  # this gets the player Puck handling
-            elif line.startswith('PS'):
-                player['PS'] = line.split(': ')[1]  # this gets the player penalty shot
+                    player['First Name'] = ''
+            elif line.lower().startswith('last name'):
+                try:
+                    player['Last Name'] = get_attr(line,1)  # this gets the first name from the last name line
+                except:
+                    player['Last Name'] = ''
+            elif line.lower().startswith('shoots'):
+                try:
+                    if get_attr(line,1)  == 'L':
+                        player['Shoots'] = 'Left'  # this gets the player shooting hand
+                    if get_attr(line,1)  == 'R':
+                        player['Shoots'] = 'Right'
+                    else:
+                        player['Shoots'] = get_attr(line,1) 
+                except:
+                    player['Shoots'] = ''
+            elif line.lower().startswith('recruited'):
+                try:
+                    player['Recruited by'] = get_attr(line,1)   # this gets where they were recruited (if applicable)
+                except:
+                    player['Recruited by'] = ''
+            elif line.lower().startswith('player render'):
+                try:
+                    player['Player Render'] = get_attr(line,1)   # this gets the player render
+                except:
+                    player['Player Render'] = ''
+            elif line.lower().startswith('jersey number'):
+                try:
+                    player['Jersey Number'] = get_attr(line,1)   # this gets the player Jersey Number
+                except:
+                    player['Jersey Number'] = ''
+            elif line.lower().startswith('height'):
+                try:
+                    player['Height'] = get_attr(line,1)   # this gets the player height
+                except:
+                    player['Height'] = ''
+            elif line.lower().startswith('weight'):
+                try:
+                    player['Weight'] = get_attr(line,1)   # this gets the player weight
+                except:
+                    player['Weight'] = ''
+            elif line.lower().startswith('birthplace'):
+                try:
+                    player['Birthplace'] = get_attr(line,1)   # this gets the player birthplace
+                except:
+                    player['Birthplace'] = ''
+            elif line.lower().startswith('player type'):
+                try:
+                    player['Player Role'] = get_attr(line,1)   # this gets the player type
+                except:
+                    player['Player Role'] = ''
+            elif line.lower().startswith('points available') or line.lower().startswith('bank') or line.lower().startswith('total bank'):
+                try:
+                    available = get_attr(line,1)   # this gets the amount of points the player has available
+                    #available = available.split()[0].rstrip('Â')
+                    player['Points Available'] = available
+                except:
+                    player['Points Available'] = '0'
+            #if position != 'G' and player['Last Name'] != 'Yukikami' and player['Last Name'] != 'Hughes':
+            #skater ratings
+            if position != 'G':
+                #Offensive Ratings
+                if line.lower().startswith('screening'):
+                    player['Screening'] = get_attr(line,1)   # this gets the player Screening
+                elif line.lower().startswith('getting open'):
+                    player['Getting Open'] = get_attr(line,1)   # this gets the player Getting Open
+                elif line.lower().startswith('passing'):
+                    player['Passing'] = get_attr(line,1)   # this gets the player Passing
+                elif line.lower().startswith('puckhandling'):
+                    player['Puckhandling'] = get_attr(line,1)  # this gets the player Puckhandling
+                elif line.lower().startswith('shooting accuracy'):
+                    player['Shooting Accuracy'] = get_attr(line,1)   # this gets the player Shooting Accuracy
+                elif line.lower().startswith('shooting range'):
+                    player['Shooting Range'] = get_attr(line,1)   # this gets the player Shooting Range
+                elif line.lower().startswith('offensive read'):
+                    player['Offensive Read'] = get_attr(line,1)   # this gets the player Offensive Read
+                #Defensive Ratings
+                elif line.lower().startswith('checking'):
+                    player['Checking'] = get_attr(line,1)   # this gets the player Checking
+                elif line.lower().startswith('hitting'):
+                    player['Hitting'] = get_attr(line,1)   # this gets the player Hitting
+                elif line.lower().startswith('positioning'):
+                    player['Positioning'] = get_attr(line,1)   # this gets the player Positioning
+                elif line.lower().startswith('stickchecking'):
+                    player['Stickchecking'] = get_attr(line,1)   # this gets the player Stickchecking
+                elif line.lower().startswith('shot blocking'):
+                    player['Shot Blocking'] = get_attr(line,1)   # this gets the player Shot Blocking
+                elif line.lower().startswith('faceoffs'):
+                    player['Faceoffs'] = get_attr(line,1)   # this gets the player Faceoffs
+                elif line.lower().startswith('defensive read'):
+                    player['Defensive Read'] = get_attr(line,1)   # this gets the player Defensive Read
+                #Physical Ratings
+                elif line.lower().startswith('acceleration'):
+                    player['Acceleration'] = get_attr(line,1)   # this gets the player Acceleration
+                elif line.lower().startswith('agility'):
+                    player['Agility'] = get_attr(line,1)   # this gets the player Agility
+                elif line.lower().startswith('balance'):
+                    player['Balance'] = get_attr(line,1)   # this gets the player Balance
+                elif line.lower().startswith('speed'):
+                    player['Speed'] = get_attr(line,1)   # this gets the player Speed
+                elif line.lower().startswith('stamina'):
+                    player['Stamina'] = get_attr(line,1)   # this gets the player Stamina
+                elif line.lower().startswith('strength:') or line.lower().startswith('strength '):
+                    player['Strength'] = get_attr(line,1)   # this gets the player Strength
+                elif line.lower().startswith('fighting'):
+                    player['Fighting'] = get_attr(line,1)   # this gets the player Fighting
+                #Mental Ratings
+                elif line.lower().startswith('aggression'):
+                    player['Aggression'] = get_attr(line,1)   # this gets the player Aggression
+                elif line.lower().startswith('bravery'):
+                    player['Bravery'] = get_attr(line,1)   # this gets the player Bravery
+                elif line.lower().startswith('*determination'):
+                    player['Determination'] = '15'  # this gets the player Determination
+                elif line.lower().startswith('*team player'):
+                    player['Team Player'] = '15'  # this gets the player Team Player
+                elif line.lower().startswith('*temperament'):
+                    player['Temperament'] = '15'  # this gets the player Temperament
+                elif line.lower().startswith('*professionalism'):
+                    player['Professionalism'] = '15'  # this gets the player Professionalism
+            #goalie ratings    
+            elif position == 'G':
+                #goalie ratings
+                if line.lower().startswith('blocker'):
+                    player['Blocker'] = get_attr(line,1)   # this gets the player Blocker
+                elif line.lower().startswith('glove'):
+                    player['Glove'] = get_attr(line,1)  # this gets the player Glove
+                elif line.lower().startswith('passing'):
+                    player['Passing'] = get_attr(line,1)   # this gets the player Passing
+                elif line.lower().startswith('poke check'):
+                    player['Poke Check'] = get_attr(line,1)   # this gets the player Poke Check
+                elif line.lower().startswith('positioning'):
+                    player['Positioning'] = get_attr(line,1)   # this gets the player Positioning
+                elif line.lower().startswith('rebound'):
+                    player['Rebound'] = get_attr(line,1)   # this gets the player Rebound
+                elif line.lower().startswith('recovery'):
+                    player['Recovery'] = get_attr(line,1)   # this gets the player Recovery
+                elif line.lower().startswith('puckhandling'):
+                    player['Puckhandling'] = get_attr(line,1)   # this gets the player Puckhandling
+                elif line.lower().startswith('low shots'):
+                    player['Low Shots'] = get_attr(line,1)   # this gets the player Low Shots
+                elif line.lower().startswith('reflexes'):
+                    player['Reflexes'] = get_attr(line,1)   # this gets the player Reflexes
+                elif line.lower().startswith('skating'):
+                    player['Skating'] = get_attr(line,1)   # this gets the player Skating
+                #mental ratings
+                elif line.lower().startswith('*aggression'):
+                    player['Aggression'] = '8'  # this gets the player Aggression
+                elif line.lower().startswith('mental toughness'):
+                    player['Mental Toughness'] = get_attr(line,1)   # this gets the player Mental Toughness
+                elif line.lower().startswith('*determination'):
+                    player['Determination'] = '15'  # this gets the player Determination
+                elif line.lower().startswith('*team player'):
+                    player['Team Player'] = '15' # this gets the player Team Player
+                elif line.lower().startswith('*leadership'):
+                    player['Leadership'] = '15'  # this gets the player Leadership
+                elif line.lower().startswith('goalie stamina'):
+                    player['Goalie Stamina'] = get_attr(line,1)   # this gets the player Goalie Stamina
+                elif line.lower().startswith('*professionalism'):
+                    player['Professionalism'] = '15' # this gets the player Professionalism
+        
+    player['Applied TPE'] = get_tpe(player,player['Played Position'])
+    try:
+        player['Total TPE'] = get_tpe(player,player['Played Position']) + int(player['Points Available'])
+    except:
+        player['Total TPE'] = get_tpe(player,player['Played Position'])
+    
+    print(player['Team'],' - ',player['First Name'],' ',player['Last Name'],' - ',player['Played Position'])
     return player  # return the player
 
+def get_tpe(player,position):
+    if position != 'G':
+        attr_set = ['Screening', 'Getting Open', 'Passing', 'Puckhandling', 'Shooting Accuracy', 'Shooting Range', 'Offensive Read',
+                    'Checking','Hitting','Stickchecking','Positioning','Shot Blocking','Faceoffs','Defensive Read',
+                    'Acceleration','Agility','Balance','Speed','Strength','Fighting',
+                    'Aggression','Bravery',
+                    #next week take stamina out of this calc
+                    'Stamina'
+                    ]
+    elif position == 'G':
+        attr_set = ['Positioning','Passing','Poke Check','Blocker','Glove','Rebound','Recovery','Puckhandling'
+                      ,'Low Shots','Reflexes','Skating','Mental Toughness','Goalie Stamina'
 
-def get_player_tpe(page, player_dict):
-    """calculate the total tpe based on points given. Takes in a page and player dict as backup"""
-    position_and_class = page.strong.text
-    tpe = str()
-    draft_class = str()
-    position = str()
-
-    if position_and_class.__contains__(' C ') or position_and_class.__contains__(' Center ') or position_and_class.__contains__(' CENTER '):
-        position = 'C'
-    if position_and_class.__contains__(' LW ') or position_and_class.__contains__(' Left Wing ') or position_and_class.__contains__(' LEFT WING '):
-        position = 'LW'
-    if position_and_class.__contains__(' RW ') or position_and_class.__contains__(' Right Wing ') or position_and_class.__contains__(' RIGHT WING '):
-        position = 'RW'
-    if position_and_class.__contains__(' D ') or position_and_class.__contains__(' Defense ') or position_and_class.__contains__(' DEFENSE '):
-        position = 'D'
-    if position_and_class.__contains__(' G ') or position_and_class.__contains__(' Goalie ') or position_and_class.__contains__(' GOALIE '):
-        position = 'G'
-
-    draft_class = position_and_class.split()[0].strip('[').strip(']')
+                    ]
     try:
-        tpe = page.small.text
-        if len(tpe.split()) == 2:
-            tpe = tpe.split()[1]
-        else:
-            print(len(tpe.split()))
+        tpe = 0
+        for a in attr_set:
+            if int(player[a]) > 17:
+                tpe += (int(player[a]) - 17)*40 + (17 - 15)*25 + (15 - 13)*15 + (13 - 11)*8 + (11 - 9)*5 + (9 - 7)*2 + (7 - 5)*1
+            elif int(player[a]) > 15:
+                tpe += (int(player[a]) - 15)*25 + (15 - 13)*15 + (13 - 11)*8 + (11 - 9)*5 + (9 - 7)*2 + (7 - 5)*1
+            elif int(player[a]) > 13:
+                tpe += (int(player[a]) - 13)*15 + (13 - 11)*8 + (11 - 9)*5 + (9 - 7)*2 + (7 - 5)*1
+            elif int(player[a]) > 11:
+                tpe += (int(player[a]) - 11)*8 + (11 - 9)*5 + (9 - 7)*2 + (7 - 5)*1
+            elif int(player[a]) > 9:
+                tpe += (int(player[a]) - 9)*5 + (9 - 7)*2 + (7 - 5)*1
+            elif int(player[a]) > 7:
+                tpe += (int(player[a]) - 7)*2 + (7 - 5)*1
+            elif int(player[a]) > 5:
+                tpe += (int(player[a]) - 5)*1
+
+        ####### NEXT WEEK ADD THIS BLOCK BACK IN ######    
+
+        #if int(player['Stamina']) > 17:
+        #    tpe += (int(player['Stamina']) - 17)*40 + (17 - 15)*25 + (15 - 11)*8
+        #elif int(player['Stamina']) > 15:
+        #    tpe += (int(player['Stamina']) - 15)*25 + (15 - 11)*8
+        #elif int(player['Stamina']) > 11:
+        #    tpe += (int(player['Stamina']) - 11)*8
+        #print('Stamina',player['Stamina'],tpe)
     except:
-        tpe = 'Calculate it yourself!'
+        tpe = 0
+        
+    return tpe
 
-    print(position_and_class)
-    return tpe, draft_class, position
-
+def get_attr(line,pos):
+    try:
+        out = line.strip().lower().split(':')[pos]
+    except:
+        try:
+            out = line.lower().split(' ')
+            out = out[len(out)-1].strip()
+        except:
+            out = None
+    return out
 
 def main():
     """main"""
     url_file = "roster_urls.json"
-    smjhl_players_csv = "smjhl-2020-2-24.csv"
-    shl_players_csv = "shl-2020-1-31.csv"
+    smjhl_players_csv = "smjhl-2020-5-12.csv"
+    shl_players_csv = "shl-2020-5-12.csv"
+    shl_prospects_csv = "prospects-2020-5-12.csv"
     get_smjhl_players(url_file, smjhl_players_csv)
-    #get_shl_players(url_file, shl_players_csv)
-
+    get_shl_players(url_file, shl_players_csv)
+    get_shl_prospects(url_file, shl_prospects_csv)
 
 main()

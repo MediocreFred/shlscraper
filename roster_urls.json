@@ -6,7 +6,7 @@
          "Carolina Kraken":"https://simulationhockey.com/forumdisplay.php?fid=135",
          "Colorado Raptors":"https://simulationhockey.com/forumdisplay.php?fid=541",
          "Detroit Falcons":"https://simulationhockey.com/forumdisplay.php?fid=137",
-         "Halifax Raiders":"https://simulationhockey.com/forumdisplay.php?fid=540",
+         "Maine Timber":"https://simulationhockey.com/forumdisplay.php?fid=540",
          "Kelowna Knights":"https://simulationhockey.com/forumdisplay.php?fid=149",
          "Newfoundland Berserkers":"https://simulationhockey.com/forumdisplay.php?fid=617",
          "St. Louis Scarecrows":"https://simulationhockey.com/forumdisplay.php?fid=139",
@@ -17,10 +17,10 @@
          "Chicago Syndicate": "https://simulationhockey.com/forumdisplay.php?fid=633",
          "Hamilton Steelhawks": "https://simulationhockey.com/forumdisplay.php?fid=91",
          "Manhattan Rage": "https://simulationhockey.com/forumdisplay.php?fid=108",
-         "New England Rage": "https://simulationhockey.com/forumdisplay.php?fid=339",
+         "New England Wolfpack": "https://simulationhockey.com/forumdisplay.php?fid=339",
          "Tampa Bay Barracuda": "https://simulationhockey.com/forumdisplay.php?fid=117",
          "Toronto North Stars": "https://simulationhockey.com/forumdisplay.php?fid=105",
-         "West Kendall Platoon": "https://simulationhockey.com/forumdisplay.php?fid=102",
+         "Baltimore Platoon": "https://simulationhockey.com/forumdisplay.php?fid=102",
          "Calgary Dragons": "https://simulationhockey.com/forumdisplay.php?fid=120",
          "Edmonton Blizzard": "https://simulationhockey.com/forumdisplay.php?fid=123",
          "Los Angeles Panthers": "https://simulationhockey.com/forumdisplay.php?fid=126",
@@ -29,7 +29,24 @@
          "San Fransisco Pride": "https://simulationhockey.com/forumdisplay.php?fid=530",
          "Texas Renegades": "https://simulationhockey.com/forumdisplay.php?fid=345",
          "Winnipeg Jets": "https://simulationhockey.com/forumdisplay.php?fid=114"
-
-      }
+      },
+	  "Prospects":{
+         "Buffalo Stampede": "https://simulationhockey.com/forumdisplay.php?fid=595",
+         "Chicago Syndicate": "https://simulationhockey.com/forumdisplay.php?fid=636",
+         "Hamilton Steelhawks": "https://simulationhockey.com/forumdisplay.php?fid=596",
+         "Manhattan Rage": "https://simulationhockey.com/forumdisplay.php?fid=597",
+         "New England Wolfpack": "https://simulationhockey.com/forumdisplay.php?fid=599",
+         "Tampa Bay Barracuda": "https://simulationhockey.com/forumdisplay.php?fid=607",
+         "Toronto North Stars": "https://simulationhockey.com/forumdisplay.php?fid=600",
+         "Baltimore Platoon": "https://simulationhockey.com/forumdisplay.php?fid=601",
+         "Calgary Dragons": "https://simulationhockey.com/forumdisplay.php?fid=603",
+         "Edmonton Blizzard": "https://simulationhockey.com/forumdisplay.php?fid=604",
+         "Los Angeles Panthers": "https://simulationhockey.com/forumdisplay.php?fid=605",
+         "Minnesota Chiefs": "https://simulationhockey.com/forumdisplay.php?fid=598",
+         "New Orleans Specters": "https://simulationhockey.com/forumdisplay.php?fid=641",
+         "San Fransisco Pride": "https://simulationhockey.com/forumdisplay.php?fid=606",
+         "Texas Renegades": "https://simulationhockey.com/forumdisplay.php?fid=608",
+         "Winnipeg Jets": "https://simulationhockey.com/forumdisplay.php?fid=602"	  
+	  }
    }
 }
