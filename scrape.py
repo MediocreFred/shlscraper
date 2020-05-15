@@ -1,7 +1,7 @@
 import requests, json, csv, random
 from bs4 import BeautifulSoup
 import os
-os.chdir(r'C:\projects\shl_scraper')
+#os.chdir(r'C:\projects\shl_scraper')
 
 user_agent_list = [
    # Chrome
