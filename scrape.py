@@ -3,6 +3,7 @@ import json
 import csv
 import random
 import requests
+import time
 from bs4 import BeautifulSoup
 #import os
 #os.chdir(r'C:\projects\shl_scraper')
@@ -414,10 +415,11 @@ def get_attr(line, pos):
 
 def main():
     """main"""
+    timestamp = time.strftime("%Y-%m-%d")
     url_file = "roster_urls.json"
-    smjhl_players_csv = "smjhl-2020-5-15.csv"
-    shl_players_csv = "shl-2020-5-15.csv"
-    shl_prospects_csv = "prospects-2020-5-15.csv"
+    smjhl_players_csv = "smjhl-" + timestamp + ".csv"
+    shl_players_csv = "shl-" + timestamp + ".csv"
+    shl_prospects_csv = "prospects-"+ timestamp + ".csv"
     get_smjhl_players(url_file, smjhl_players_csv)
     get_shl_players(url_file, shl_players_csv)
     get_shl_prospects(url_file, shl_prospects_csv)
