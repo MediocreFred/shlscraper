@@ -51,6 +51,10 @@
          "San Fransisco Pride": "https://simulationhockey.com/forumdisplay.php?fid=606",
          "Texas Renegades": "https://simulationhockey.com/forumdisplay.php?fid=608",
          "Winnipeg Jets": "https://simulationhockey.com/forumdisplay.php?fid=602"	  
-	  }
+	  },
+      "Placeholder": {
+         "Baltimore Platoon": "https://simulationhockey.com/forumdisplay.php?fid=102",
+         "Buffalo Stampede": "https://simulationhockey.com/forumdisplay.php?fid=526"
+      }
    }
 }

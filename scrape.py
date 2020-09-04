@@ -287,7 +287,7 @@ def get_player_stats(name_url, team, player_type):
                     player['Getting Open'] = get_attr(line, 1)  # this gets the player Getting Open
                 elif line.lower().startswith('passing'):
                     player['Passing'] = get_attr(line, 1)  # this gets the player Passing
-                elif line.lower().startswith('puckhandling'):
+                elif line.lower().startswith('puckhandling') or line.lower().startswith('puck handling'):
                     player['Puckhandling'] = get_attr(line, 1)  # this gets the player Puckhandling
                 elif line.lower().startswith('shooting accuracy'):
                     player['Shooting Accuracy'] = get_attr(line, 1)  # this gets the player Shooting Accuracy
@@ -302,7 +302,7 @@ def get_player_stats(name_url, team, player_type):
                     player['Hitting'] = get_attr(line, 1)  # this gets the player Hitting
                 elif line.lower().startswith('positioning'):
                     player['Positioning'] = get_attr(line, 1)  # this gets the player Positioning
-                elif line.lower().startswith('stickchecking'):
+                elif line.lower().startswith('stickchecking') or line.lower().startswith('stick checking'):
                     player['Stickchecking'] = get_attr(line, 1)  # this gets the player Stickchecking
                 elif line.lower().startswith('shot blocking'):
                     player['Shot Blocking'] = get_attr(line, 1)  # this gets the player Shot Blocking
@@ -355,7 +355,7 @@ def get_player_stats(name_url, team, player_type):
                     player['Rebound'] = get_attr(line, 1)  # this gets the player Rebound
                 elif line.lower().startswith('recovery'):
                     player['Recovery'] = get_attr(line, 1)  # this gets the player Recovery
-                elif line.lower().startswith('puckhandling'):
+                elif line.lower().startswith('puckhandling') or line.lower().startswith('puck handling'):
                     player['Puckhandling'] = get_attr(line, 1)  # this gets the player Puckhandling
                 elif line.lower().startswith('low shots'):
                     player['Low Shots'] = get_attr(line, 1)  # this gets the player Low Shots
@@ -405,39 +405,39 @@ def get_tpe(player, position):
     elif position == 'G':
         attr_set = ['Positioning', 'Passing', 'Poke Check', 'Blocker', 'Glove', 'Rebound', 'Recovery', 'Puckhandling',
                     'Low Shots', 'Reflexes', 'Skating', 'Mental Toughness', 'Goalie Stamina']
-    try:
-        tpe = 0
-        for a in attr_set:
-            if int(player[a]) > 17:
-                tpe += (int(player[a]) - 17) * 40 + (17 - 15) * 25 + (15 - 13) * 15 + (13 - 11) * 8 + (11 - 9) * 5 + (
-                        9 - 7) * 2 + (7 - 5) * 1
-            elif int(player[a]) > 15:
-                tpe += (int(player[a]) - 15) * 25 + (15 - 13) * 15 + (13 - 11) * 8 + (11 - 9) * 5 + (9 - 7) * 2 + (
-                        7 - 5) * 1
-            elif int(player[a]) > 13:
-                tpe += (int(player[a]) - 13) * 15 + (13 - 11) * 8 + (11 - 9) * 5 + (9 - 7) * 2 + (7 - 5) * 1
-            elif int(player[a]) > 11:
-                tpe += (int(player[a]) - 11) * 8 + (11 - 9) * 5 + (9 - 7) * 2 + (7 - 5) * 1
-            elif int(player[a]) > 9:
-                tpe += (int(player[a]) - 9) * 5 + (9 - 7) * 2 + (7 - 5) * 1
-            elif int(player[a]) > 7:
-                tpe += (int(player[a]) - 7) * 2 + (7 - 5) * 1
-            elif int(player[a]) > 5:
-                tpe += (int(player[a]) - 5) * 1
-    except Exception:
-        tpe = 'error calculating TPE'
+    # try:
+    tpe = 0
+    for a in attr_set:
+        if int(player[a]) > 17:
+            tpe += (int(player[a]) - 17) * 40 + (17 - 15) * 25 + (15 - 13) * 15 + (13 - 11) * 8 + (11 - 9) * 5 + (
+                    9 - 7) * 2 + (7 - 5) * 1
+        elif int(player[a]) > 15:
+            tpe += (int(player[a]) - 15) * 25 + (15 - 13) * 15 + (13 - 11) * 8 + (11 - 9) * 5 + (9 - 7) * 2 + (
+                    7 - 5) * 1
+        elif int(player[a]) > 13:
+            tpe += (int(player[a]) - 13) * 15 + (13 - 11) * 8 + (11 - 9) * 5 + (9 - 7) * 2 + (7 - 5) * 1
+        elif int(player[a]) > 11:
+            tpe += (int(player[a]) - 11) * 8 + (11 - 9) * 5 + (9 - 7) * 2 + (7 - 5) * 1
+        elif int(player[a]) > 9:
+            tpe += (int(player[a]) - 9) * 5 + (9 - 7) * 2 + (7 - 5) * 1
+        elif int(player[a]) > 7:
+            tpe += (int(player[a]) - 7) * 2 + (7 - 5) * 1
+        elif int(player[a]) > 5:
+            tpe += (int(player[a]) - 5) * 1
+    # except Exception:
+    #     tpe = 'error calculating TPE'
         # ###### NEXT WEEK ADD THIS BLOCK BACK IN ######
-    try:
-        if int(player['Stamina']) > 17:
-            tpe += (int(player['Stamina']) - 17) * 40 + (17 - 15) * 25 + (15 - 11) * 8
-        elif int(player['Stamina']) > 15:
-            tpe += (int(player['Stamina']) - 15) * 25 + (15 - 11) * 8
-        elif int(player['Stamina']) > 11:
-            tpe += (int(player['Stamina']) - 11) * 8
+    # try:
+    if player['Position'] != 'G' and int(player['Stamina']) > 17:
+        tpe += (int(player['Stamina']) - 17) * 40 + (17 - 15) * 25 + (15 - 11) * 8
+    elif player['Position'] != 'G' and int(player['Stamina']) > 15:
+        tpe += (int(player['Stamina']) - 15) * 25 + (15 - 11) * 8
+    elif player['Position'] != 'G' and int(player['Stamina']) > 11:
+        tpe += (int(player['Stamina']) - 11) * 8
         # print('Stamina', player['Stamina'], tpe)
-    except Exception:
-        # tpe = 'error calculating TPE Stamina'
-        print('error calculating TPE Stamina')
+    # except Exception:
+    #     tpe = 'error calculating TPE Stamina'
+    #     print('error calculating TPE Stamina')
 
     return tpe
 
@@ -462,10 +462,8 @@ def main():
     smjhl_players_csv = "smjhl-" + timestamp + ".csv"
     shl_players_csv = "shl-" + timestamp + ".csv"
     shl_prospects_csv = "prospects-" + timestamp + ".csv"
-    # get_smjhl_players(url_file, smjhl_players_csv)
-    # get_shl_players(url_file, shl_players_csv)
-    # get_shl_prospects(url_file, shl_prospects_csv)
     for file, league in [(smjhl_players_csv, "SMJHL"), (shl_players_csv, "SHL"), (shl_prospects_csv, "Prospects")]:
+    # for file, league in [(shl_players_csv, "SHL")]:
         get_players(url_file, file, league)
 
 
