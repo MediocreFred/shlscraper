@@ -62,60 +62,6 @@ def get_players(url_file, players_csv, league):
             writer.writerow(data)
 
 
-# def get_smjhl_players(url_file, smjhl_players_csv):
-#     """use the urls provided in the json to get each player's information"""
-#     team_url_list = get_roster_url(url_file, 'SMJHL')
-#     player_dict_list = list()  # list that will hold all of the player info dicts to be put into a csv
-#     for team in team_url_list:  # For each team in the list
-#         player_url_list = get_player_urls(team[1])  # get each player page URL
-#         for player in player_url_list:  # for each player in player_url_list
-#             player_dict_list.append(get_player_stats('https://www.simulationhockey.com/' + player, team[0], 'Prospect'))
-#     # look into using csv dictwriter.writerows() to write the list of dictionaries into the csv file
-#     csv_file = smjhl_players_csv
-#     csv_columns = player_dict_list[0].keys()
-#     with open(csv_file, 'w+', encoding='utf-8-sig', newline='') as csvfile:
-#         writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
-#         writer.writeheader()
-#         for data in player_dict_list:
-#             writer.writerow(data)
-#
-#
-# def get_shl_players(url_file, shl_players_csv):
-#     """use the urls provided in the json to get each player's information"""
-#     team_url_list = get_roster_url(url_file, 'SHL')
-#     player_dict_list = list()  # list that will hold all of the player info dicts to be put into a csv
-#     for team in team_url_list:  # For each team in the list
-#         player_url_list = get_player_urls(team[1])  # get each player page URL
-#         for player in player_url_list:  # for each player in player_url_list
-#             player_dict_list.append(get_player_stats('https://www.simulationhockey.com/' + player, team[0], 'SHL'))
-#     # look into using csv dictwriter.writerows() to write the list of dictionaries into the csv file
-#     csv_file = shl_players_csv
-#     csv_columns = player_dict_list[0].keys()
-#     with open(csv_file, 'w+', encoding='utf-8-sig', newline='') as csvfile:
-#         writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
-#         writer.writeheader()
-#         for data in player_dict_list:
-#             writer.writerow(data)
-#
-#
-# def get_shl_prospects(url_file, shl_prospects_csv):
-#     """use the urls provided in the json to get each player's information"""
-#     prospect_url_list = get_roster_url(url_file, 'Prospects')
-#     player_dict_list = list()  # list that will hold all of the player info dicts to be put into a csv
-#     for team in prospect_url_list:  # For each team in the list
-#         player_url_list = get_player_urls(team[1])  # get each player page URL
-#         for player in player_url_list:  # for each player in player_url_list
-#             player_dict_list.append(get_player_stats('https://www.simulationhockey.com/' + player, team[0], 'Prospect'))
-#     # look into using csv dictwriter.writerows() to write the list of dictionaries into the csv file
-#     csv_file = shl_prospects_csv
-#     csv_columns = player_dict_list[0].keys()
-#     with open(csv_file, 'w+', encoding='utf-8-sig', newline='') as csvfile:
-#         writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
-#         writer.writeheader()
-#         for data in player_dict_list:
-#             writer.writerow(data)
-
-
 def get_roster_url(url_file, league):
     """Get the roster URLs for the specified league"""
     return_list = []
@@ -191,15 +137,6 @@ def get_player_stats(name_url, team, player_type):
         position = 'G'
 
     draft_class = position_and_class.split()[0].strip('[').strip(']').strip('(').strip(')')
-    # draft_class_num = position_and_class.split()[0].strip('[').strip(']').strip('S').strip('(').strip(')')
-    # try:
-    #     tpe = soup.find_all('td', 'thead')[1].small.text
-    #     if len(tpe.split()) == 3:
-    #         tpe = tpe.split()[2]
-    #     else:
-    #         tpe = tpe.split()[1]
-    # except:
-    #     tpe = 'Calculation function not available'
 
     post = soup.find_all('div', 'post_body scaleimages')[0]
     post_text = post.text.split('\n')  # split the text from the body up into rows for easy iteration
@@ -405,39 +342,39 @@ def get_tpe(player, position):
     elif position == 'G':
         attr_set = ['Positioning', 'Passing', 'Poke Check', 'Blocker', 'Glove', 'Rebound', 'Recovery', 'Puckhandling',
                     'Low Shots', 'Reflexes', 'Skating', 'Mental Toughness', 'Goalie Stamina']
-    # try:
-    tpe = 0
-    for a in attr_set:
-        if int(player[a]) > 17:
-            tpe += (int(player[a]) - 17) * 40 + (17 - 15) * 25 + (15 - 13) * 15 + (13 - 11) * 8 + (11 - 9) * 5 + (
-                    9 - 7) * 2 + (7 - 5) * 1
-        elif int(player[a]) > 15:
-            tpe += (int(player[a]) - 15) * 25 + (15 - 13) * 15 + (13 - 11) * 8 + (11 - 9) * 5 + (9 - 7) * 2 + (
-                    7 - 5) * 1
-        elif int(player[a]) > 13:
-            tpe += (int(player[a]) - 13) * 15 + (13 - 11) * 8 + (11 - 9) * 5 + (9 - 7) * 2 + (7 - 5) * 1
-        elif int(player[a]) > 11:
-            tpe += (int(player[a]) - 11) * 8 + (11 - 9) * 5 + (9 - 7) * 2 + (7 - 5) * 1
-        elif int(player[a]) > 9:
-            tpe += (int(player[a]) - 9) * 5 + (9 - 7) * 2 + (7 - 5) * 1
-        elif int(player[a]) > 7:
-            tpe += (int(player[a]) - 7) * 2 + (7 - 5) * 1
-        elif int(player[a]) > 5:
-            tpe += (int(player[a]) - 5) * 1
-    # except Exception:
-    #     tpe = 'error calculating TPE'
+    try:
+        tpe = 0
+        for a in attr_set:
+            if int(player[a]) > 17:
+                tpe += (int(player[a]) - 17) * 40 + (17 - 15) * 25 + (15 - 13) * 15 + (13 - 11) * 8 + (11 - 9) * 5 + (
+                        9 - 7) * 2 + (7 - 5) * 1
+            elif int(player[a]) > 15:
+                tpe += (int(player[a]) - 15) * 25 + (15 - 13) * 15 + (13 - 11) * 8 + (11 - 9) * 5 + (9 - 7) * 2 + (
+                        7 - 5) * 1
+            elif int(player[a]) > 13:
+                tpe += (int(player[a]) - 13) * 15 + (13 - 11) * 8 + (11 - 9) * 5 + (9 - 7) * 2 + (7 - 5) * 1
+            elif int(player[a]) > 11:
+                tpe += (int(player[a]) - 11) * 8 + (11 - 9) * 5 + (9 - 7) * 2 + (7 - 5) * 1
+            elif int(player[a]) > 9:
+                tpe += (int(player[a]) - 9) * 5 + (9 - 7) * 2 + (7 - 5) * 1
+            elif int(player[a]) > 7:
+                tpe += (int(player[a]) - 7) * 2 + (7 - 5) * 1
+            elif int(player[a]) > 5:
+                tpe += (int(player[a]) - 5) * 1
+    except Exception:
+        tpe = 'error calculating TPE'
         # ###### NEXT WEEK ADD THIS BLOCK BACK IN ######
-    # try:
-    if player['Position'] != 'G' and int(player['Stamina']) > 17:
-        tpe += (int(player['Stamina']) - 17) * 40 + (17 - 15) * 25 + (15 - 11) * 8
-    elif player['Position'] != 'G' and int(player['Stamina']) > 15:
-        tpe += (int(player['Stamina']) - 15) * 25 + (15 - 11) * 8
-    elif player['Position'] != 'G' and int(player['Stamina']) > 11:
-        tpe += (int(player['Stamina']) - 11) * 8
+    try:
+        if player['Position'] != 'G' and int(player['Stamina']) > 17:
+            tpe += (int(player['Stamina']) - 17) * 40 + (17 - 15) * 25 + (15 - 11) * 8
+        elif player['Position'] != 'G' and int(player['Stamina']) > 15:
+            tpe += (int(player['Stamina']) - 15) * 25 + (15 - 11) * 8
+        elif player['Position'] != 'G' and int(player['Stamina']) > 11:
+            tpe += (int(player['Stamina']) - 11) * 8
         # print('Stamina', player['Stamina'], tpe)
-    # except Exception:
-    #     tpe = 'error calculating TPE Stamina'
-    #     print('error calculating TPE Stamina')
+    except Exception:
+        tpe = 'error calculating TPE Stamina'
+        print('error calculating TPE Stamina')
 
     return tpe
 
@@ -463,7 +400,7 @@ def main():
     shl_players_csv = "shl-" + timestamp + ".csv"
     shl_prospects_csv = "prospects-" + timestamp + ".csv"
     for file, league in [(smjhl_players_csv, "SMJHL"), (shl_players_csv, "SHL"), (shl_prospects_csv, "Prospects")]:
-    # for file, league in [(shl_players_csv, "SHL")]:
+        # for file, league in [(shl_players_csv, "Placeholder")]:
         get_players(url_file, file, league)
 
 
